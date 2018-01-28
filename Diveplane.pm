@@ -23,13 +23,29 @@ sub init(\%$) {
 
 	# Don't assume the probablities add up to 1
 	$probsum = 0;
+	foreach my $key (keys %$dataref) {
+		$probsum += $$dataref{$key};
+	}
+
+	# Split the keys into buckets
+	my $numbuckets = 10000;
+	my $bucketfactor = 1;
+	# Try to keep the number of buckets useful but manageable
+	if ($probsum > ($numbuckets*100)) {
+		$bucketfactor = int($numbuckets / $probsum);
+	}
 
 	# Sort the data so we can make sure that output is reproducible
 	# and do it at input time to do it only once per input set
+	$probsum = 0;
 	foreach my $key (sort {$a <=> $b} keys %$dataref) { ### Note: sort numerically
 		# put sorted data into an array of tuples
-		$probsum += $$dataref{$key};
-		push @dataset, [$key, $$dataref{$key}, $probsum];
+		$probsum += $$dataref{$key} * $bucketfactor;
+		my $bucketnum = int($probsum);
+		if (not defined($dataset[$bucketnum])) {
+			$dataset[$bucketnum] = [];
+		}
+		push $dataset[$bucketnum], [$key, $$dataref{$key}, $probsum];
 	}
 
 	# default the rand seed to 1
@@ -52,15 +68,28 @@ sub rand {
 
 	# Choose a random number between 0 and the total of the probabilities
 	my $rn = lcg() * $probsum;
+	my $bucketnum = int($rn);
 
-	# Walk through the dataset to find the point where the random number lies
-	my $i = 0;
-	while ( $rn > $dataset[$i][2] ) {
-		$i++;
+	# Jump to near the right bucket and Walk through them to find the point
+	# where the random number lies
+	while ( defined($dataset[$bucketnum]) ) {
+		my $i = 0;
+		while ( defined($dataset[$bucketnum][$i]) &&
+                        ($rn > $dataset[$bucketnum][$i][2]) ) {
+			$i++;
+		}
+		if (not defined($dataset[$bucketnum][$i])) {
+			$bucketnum++;
+			while ( not defined($dataset[$bucketnum]) ) {
+				if ($bucketnum >= scalar(@dataset)) {
+					return undef;
+				}
+				$bucketnum++;
+			}
+		} else {
+			return $dataset[$bucketnum][$i][0];
+		}
 	}
-
-	# Returning the associated key
-	return $dataset[$i][0];
 }
 	
 
