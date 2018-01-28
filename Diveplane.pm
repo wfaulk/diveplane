@@ -28,8 +28,8 @@ sub init(\%$) {
 	# and do it at input time to do it only once per input set
 	foreach my $key (sort {$a <=> $b} keys %$dataref) { ### Note: sort numerically
 		# put sorted data into an array of tuples
-		push @dataset, [$key, $$dataref{$key}];
 		$probsum += $$dataref{$key};
+		push @dataset, [$key, $$dataref{$key}, $probsum];
 	}
 
 	# default the rand seed to 1
@@ -55,12 +55,12 @@ sub rand {
 
 	# Walk through the dataset to find the point where the random number lies
 	my $i = 0;
-	while ( $rn > 0 ) {
-		$rn -= $dataset[$i++][1];
+	while ( $rn > $dataset[$i][2] ) {
+		$i++;
 	}
 
 	# Returning the previous number because the increment went past it
-	return $dataset[$i-1][0];
+	return $dataset[$i][0];
 }
 	
 
@@ -74,6 +74,7 @@ sub lcg {
 	my $mask = 0x3FFFFFFF;
 
 	$seed = ( ( ( $multiplier * $seed ) + $increment ) % $modulus ) & $mask;
+	#print $seed . "\n";
 	return $seed / ((2**30)-1);
 }
 
