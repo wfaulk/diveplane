@@ -7,16 +7,15 @@ def init(idata, iseed=1):
 	global probsum
 	global seed
 	for key in sorted(idata, key=int):
-		probsum += idata[key]
-		data.append([key, idata[key], probsum])
+		intprob = int(idata[key] * 100)
+		probsum += intprob
+		for i in range(0,intprob):
+			data.append(key)
 	seed = iseed
 
 def rand():
-	rn = lcg() * probsum
-	i = 0
-	while rn > data[i][2]:
-		i += 1
-	return data[i][0]
+	rn = int(lcg() * probsum)
+	return data[rn]
 
 def lcg():
 	modulus = (2**31)-1

@@ -28,8 +28,11 @@ sub init(\%$) {
 	# and do it at input time to do it only once per input set
 	foreach my $key (sort {$a <=> $b} keys %$dataref) { ### Note: sort numerically
 		# put sorted data into an array of tuples
-		$probsum += $$dataref{$key};
-		push @dataset, [$key, $$dataref{$key}, $probsum];
+		my $intprob = int($$dataref{$key} * 100);
+		for (my $i=0; $i<$intprob; $i++) {
+			push @dataset, $key;
+		}
+		$probsum += $intprob;
 	}
 
 	# default the rand seed to 1
@@ -51,16 +54,9 @@ sub rand {
 	}
 
 	# Choose a random number between 0 and the total of the probabilities
-	my $rn = lcg() * $probsum;
+	my $rn = int(lcg() * $probsum);
 
-	# Walk through the dataset to find the point where the random number lies
-	my $i = 0;
-	while ( $rn > $dataset[$i][2] ) {
-		$i++;
-	}
-
-	# Returning the previous number because the increment went past it
-	return $dataset[$i][0];
+	return $dataset[$rn];
 }
 	
 
