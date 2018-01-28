@@ -7,7 +7,6 @@ def init(idata, iseed=1):
 	global probsum
 	global seed
 	for key in sorted(idata, key=int):
-		#print key
 		probsum += idata[key]
 		data.append([key, idata[key], probsum])
 	seed = iseed
@@ -27,7 +26,6 @@ def lcg():
 	global seed
 
 	seed = ( ( ( multiplier * seed ) + increment ) % modulus ) & mask
-	#print seed
 
 	return seed / float(((2**30)-1))
 
