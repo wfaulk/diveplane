@@ -59,7 +59,7 @@ sub rand {
 		$i++;
 	}
 
-	# Returning the previous number because the increment went past it
+	# Returning the associated key
 	return $dataset[$i][0];
 }
 	
