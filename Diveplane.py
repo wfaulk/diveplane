@@ -8,17 +8,16 @@ def init(idata, iseed=1):
 	global seed
 	for key in sorted(idata, key=int):
 		#print key
-		data.append([key, idata[key]])
 		probsum += idata[key]
+		data.append([key, idata[key], probsum])
 	seed = iseed
 
 def rand():
 	rn = lcg() * probsum
 	i = 0
-	while rn > 0:
-		rn -= data[i][1]
+	while rn > data[i][2]:
 		i += 1
-	return data[i-1][0]
+	return data[i][0]
 
 def lcg():
 	modulus = (2**31)-1
